@@ -13,15 +13,6 @@ from daily_arxiv import get_daily_arxiv
 
 logger = logging.getLogger(__name__)
 
-def get_cookie_value(cookie_key, headers):
-    if 'cookie' in headers:
-        cookies = headers['cookie'][0].split('; ')
-        for cookie in cookies:
-            key, value = cookie.split('=')
-            if key == cookie_key:
-                return value
-    return None
-
 response_body = '''<html>
 <head>
 </head>
