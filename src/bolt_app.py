@@ -9,7 +9,10 @@ from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
 from slack_sdk.oauth.installation_store import FileInstallationStore
 from slack_sdk.oauth.state_store import FileOAuthStateStore
 
-from daily_arxiv import get_daily_arxiv
+from src.daily_arxiv import get_daily_arxiv
+from src.configurations import Settings
+
+config = Settings()
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +34,25 @@ def failure(args: FailureArgs) -> BoltResponse:
 
 
 app = AsyncApp(
-    signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
+    signing_secret=config.slack_signing_secret,
     installation_store=FileInstallationStore(),
     oauth_settings=AsyncOAuthSettings(
-        client_id=os.environ.get("SLACK_CLIENT_ID"),
-        client_secret=os.environ.get("SLACK_CLIENT_SECRET"),
+        client_id=config.slack_client_id,
+        client_secret=config.slack_client_secret,
         scopes=[
             "chat:write",
+            "app_mentions:read",
+
+
+            "app_mentions:read",
+            "channels:history",
+            "channels:join",
+            "channels:read",
+            "chat:write",
+            "im:history",
+            "im:read",
+            "im:write",
+            "users:read"
         ],
         user_scopes=[],
         redirect_uri=None,
@@ -45,7 +60,7 @@ app = AsyncApp(
         redirect_uri_path="/slack/oauth_redirect",
         state_store=FileOAuthStateStore(expiration_seconds=600),
         callback_options=CallbackOptions(success=success, failure=failure),
-        install_page_rendering_enabled=False
+        install_page_rendering_enabled=True
     ),
 )
 app_handler = AsyncSlackRequestHandler(app)
@@ -53,6 +68,7 @@ app_handler = AsyncSlackRequestHandler(app)
 
 @app.event("app_mention")
 async def handle_app_mentions(event, client, say, logger):
+    print(1)
     channel_id = ...
     message_ts = ...
     answer = get_daily_arxiv()
@@ -62,3 +78,10 @@ async def handle_app_mentions(event, client, say, logger):
         thread_ts=message_ts, 
         text=answer
     )
+
+
+# Example event listener for app mentions
+@app.event("app_mention")
+async def handle_app_mention(event, say):
+    user = event['user']
+    await say(f"Hello, <@{user}>! How can I assist you today?")

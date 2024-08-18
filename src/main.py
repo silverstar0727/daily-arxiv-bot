@@ -1,7 +1,7 @@
 import logging
 from fastapi import FastAPI, Request
 
-from bolt_app import app_handler
+from src.bolt_app import app_handler
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s | %(levelname)s | %(filename)s:%(lineno)d | %(message)s')
